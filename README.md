@@ -1,1 +1,1 @@
-# Strategic_imp
+# Strategic Classification with Endogenous Improvements
