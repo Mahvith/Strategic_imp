@@ -1,0 +1,299 @@
+Loading local adult.csv...
+Using features: ['educational-num', 'capital-gain', 'capital-loss', 'hours-per-week', 'age']
+
+Training Eta (True Probability) Model...
+
+Training Bayes Optimal (f*) Model...
+
+================================================================================
+                 VERIFICATION OF BIAS SHIFT AND ERROR ORDERING                  
+================================================================================
+
+============================================================
+ TESTING BETA = 0.2
+============================================================
+
+--- Configuration: Paper (domain) (Alpha: [  5.   2.   2.   1. 100.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -0.34645
+    > SGD Trained b_s         : -0.39487
+    > Absolute Difference     : 0.04842
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.28181
+    > Strat Err (f*_s)        : 0.24722
+    > Imp-Aware Err (f*_imp)  : 0.19588
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (1.0) (Alpha: [1. 1. 1. 1. 1.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -0.52528
+    > SGD Trained b_s         : -0.59640
+    > Absolute Difference     : 0.07112
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.31538
+    > Strat Err (f*_s)        : 0.23595
+    > Imp-Aware Err (f*_imp)  : 0.19943
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (2.0) (Alpha: [2. 2. 2. 2. 2.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -0.34645
+    > SGD Trained b_s         : -0.46268
+    > Absolute Difference     : 0.11623
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.28181
+    > Strat Err (f*_s)        : 0.23306
+    > Imp-Aware Err (f*_imp)  : 0.20410
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (5.0) (Alpha: [5. 5. 5. 5. 5.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -0.23916
+    > SGD Trained b_s         : -0.20027
+    > Absolute Difference     : 0.03888
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.26422
+    > Strat Err (f*_s)        : 0.25956
+    > Imp-Aware Err (f*_imp)  : 0.19572
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (20.0) (Alpha: [20. 20. 20. 20. 20.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -0.18551
+    > SGD Trained b_s         : -0.24885
+    > Absolute Difference     : 0.06333
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.25768
+    > Strat Err (f*_s)        : 0.24514
+    > Imp-Aware Err (f*_imp)  : 0.19569
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: High education (Alpha: [ 50.   2.   2.   1. 100.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -0.34645
+    > SGD Trained b_s         : -0.38331
+    > Absolute Difference     : 0.03685
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.28181
+    > Strat Err (f*_s)        : 0.24828
+    > Imp-Aware Err (f*_imp)  : 0.19817
+    > f*_imp <= f*_s <= f* holds? Yes
+
+============================================================
+ TESTING BETA = 1.0
+============================================================
+
+--- Configuration: Paper (domain) (Alpha: [  5.   2.   2.   1. 100.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -1.06175
+    > SGD Trained b_s         : -1.12431
+    > Absolute Difference     : 0.06256
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.41093
+    > Strat Err (f*_s)        : 0.21551
+    > Imp-Aware Err (f*_imp)  : 0.17959
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (1.0) (Alpha: [1. 1. 1. 1. 1.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -1.95587
+    > SGD Trained b_s         : -2.03694
+    > Absolute Difference     : 0.08107
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.54999
+    > Strat Err (f*_s)        : 0.16314
+    > Imp-Aware Err (f*_imp)  : 0.15313
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (2.0) (Alpha: [2. 2. 2. 2. 2.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -1.06175
+    > SGD Trained b_s         : -1.09105
+    > Absolute Difference     : 0.02930
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.41093
+    > Strat Err (f*_s)        : 0.22033
+    > Imp-Aware Err (f*_imp)  : 0.18166
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (5.0) (Alpha: [5. 5. 5. 5. 5.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -0.52528
+    > SGD Trained b_s         : -0.61425
+    > Absolute Difference     : 0.08897
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.31538
+    > Strat Err (f*_s)        : 0.23301
+    > Imp-Aware Err (f*_imp)  : 0.19488
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (20.0) (Alpha: [20. 20. 20. 20. 20.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -0.25704
+    > SGD Trained b_s         : -0.31349
+    > Absolute Difference     : 0.05645
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.26597
+    > Strat Err (f*_s)        : 0.24400
+    > Imp-Aware Err (f*_imp)  : 0.19684
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: High education (Alpha: [ 50.   2.   2.   1. 100.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -1.06175
+    > SGD Trained b_s         : -1.09757
+    > Absolute Difference     : 0.03582
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.41093
+    > Strat Err (f*_s)        : 0.22131
+    > Imp-Aware Err (f*_imp)  : 0.18496
+    > f*_imp <= f*_s <= f* holds? Yes
+
+============================================================
+ TESTING BETA = 20.0
+============================================================
+
+--- Configuration: Paper (domain) (Alpha: [  5.   2.   2.   1. 100.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -18.05007
+    > SGD Trained b_s         : -12.06651
+    > Absolute Difference     : 5.98356
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.61793
+    > Strat Err (f*_s)        : 0.08365
+    > Imp-Aware Err (f*_imp)  : 0.00880
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (1.0) (Alpha: [1. 1. 1. 1. 1.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -35.93252
+    > SGD Trained b_s         : -20.57027
+    > Absolute Difference     : 15.36225
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.61793
+    > Strat Err (f*_s)        : 0.11811
+    > Imp-Aware Err (f*_imp)  : 0.00001
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: Uniform (2.0) (Alpha: [2. 2. 2. 2. 2.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -18.05007
+    > SGD Trained b_s         : -11.05181
+    > Absolute Difference     : 6.99827
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.61793
+    > Strat Err (f*_s)        : 0.06846
+    > Imp-Aware Err (f*_imp)  : 0.10320
+    > f*_imp <= f*_s <= f* holds? No
+
+--- Configuration: Uniform (5.0) (Alpha: [5. 5. 5. 5. 5.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -7.32061
+    > SGD Trained b_s         : -6.62668
+    > Absolute Difference     : 0.69393
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.61793
+    > Strat Err (f*_s)        : 0.06257
+    > Imp-Aware Err (f*_imp)  : 0.49858
+    > f*_imp <= f*_s <= f* holds? No
+
+--- Configuration: Uniform (20.0) (Alpha: [20. 20. 20. 20. 20.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -1.95587
+    > SGD Trained b_s         : -2.03576
+    > Absolute Difference     : 0.07988
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.54999
+    > Strat Err (f*_s)        : 0.16447
+    > Imp-Aware Err (f*_imp)  : 0.14979
+    > f*_imp <= f*_s <= f* holds? Yes
+
+--- Configuration: High education (Alpha: [ 50.   2.   2.   1. 100.]) ---
+
+  [Bias Shift Verification]
+    > Bayes Optimal b* : -0.16763
+    > Theoretical b_s* : -18.05007
+    > SGD Trained b_s         : -11.97459
+    > Absolute Difference     : 6.07549
+
+  [Error Ordering Verification]
+    > Bayes Err (f*)          : 0.61793
+    > Strat Err (f*_s)        : 0.06069
+    > Imp-Aware Err (f*_imp)  : 0.00853
+    > f*_imp <= f*_s <= f* holds? Yes
+
+=========================================================================================================
+                                          FINAL RESULTS SUMMARY                                          
+=========================================================================================================
+Beta  | Config          | f* (Bayes) | f*_s (Strat) | f*_imp (Ours) | Order Checks | Bias Diff 
+---------------------------------------------------------------------------------------------------------
+0.2   | Paper (domain)  | 0.28181    | 0.24722      | 0.19588       | PASS / PASS  | 0.04842
+0.2   | Uniform (1.0)   | 0.31538    | 0.23595      | 0.19943       | PASS / PASS  | 0.07112
+0.2   | Uniform (2.0)   | 0.28181    | 0.23306      | 0.20410       | PASS / PASS  | 0.11623
+0.2   | Uniform (5.0)   | 0.26422    | 0.25956      | 0.19572       | PASS / PASS  | 0.03888
+0.2   | Uniform (20.0)  | 0.25768    | 0.24514      | 0.19569       | PASS / PASS  | 0.06333
+0.2   | High education  | 0.28181    | 0.24828      | 0.19817       | PASS / PASS  | 0.03685
+1.0   | Paper (domain)  | 0.41093    | 0.21551      | 0.17959       | PASS / PASS  | 0.06256
+1.0   | Uniform (1.0)   | 0.54999    | 0.16314      | 0.15313       | PASS / PASS  | 0.08107
+1.0   | Uniform (2.0)   | 0.41093    | 0.22033      | 0.18166       | PASS / PASS  | 0.02930
+1.0   | Uniform (5.0)   | 0.31538    | 0.23301      | 0.19488       | PASS / PASS  | 0.08897
+1.0   | Uniform (20.0)  | 0.26597    | 0.24400      | 0.19684       | PASS / PASS  | 0.05645
+1.0   | High education  | 0.41093    | 0.22131      | 0.18496       | PASS / PASS  | 0.03582
+20.0  | Paper (domain)  | 0.61793    | 0.08365      | 0.00880       | PASS / PASS  | 5.98356
+20.0  | Uniform (1.0)   | 0.61793    | 0.11811      | 0.00001       | PASS / PASS  | 15.36225
+20.0  | Uniform (2.0)   | 0.61793    | 0.06846      | 0.10320       | PASS / FAIL  | 6.99827
+20.0  | Uniform (5.0)   | 0.61793    | 0.06257      | 0.49858       | PASS / FAIL  | 0.69393
+20.0  | Uniform (20.0)  | 0.54999    | 0.16447      | 0.14979       | PASS / PASS  | 0.07988
+20.0  | High education  | 0.61793    | 0.06069      | 0.00853       | PASS / PASS  | 6.07549
+---------------------------------------------------------------------------------------------------------

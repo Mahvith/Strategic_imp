@@ -1,0 +1,70 @@
+Loading local adult.csv...
+
+Training ORACLE Eta Model on full training set...
+
+================================================================================
+                     STARTING SAMPLE COMPLEXITY EXPERIMENT                      
+================================================================================
+
+--- Training on Subset Size: 1581 / 31622 ---
+Results for N=1581:
+  err_imp(f*)     = 0.44434
+  err_imp(f*_s)   = 0.23301
+  err_imp(f*_imp) = 0.17829
+
+--- Training on Subset Size: 4918 / 31622 ---
+Results for N=4918:
+  err_imp(f*)     = 0.42829
+  err_imp(f*_s)   = 0.22547
+  err_imp(f*_imp) = 0.20356
+
+--- Training on Subset Size: 8256 / 31622 ---
+Results for N=8256:
+  err_imp(f*)     = 0.42296
+  err_imp(f*_s)   = 0.22263
+  err_imp(f*_imp) = 0.17847
+
+--- Training on Subset Size: 11594 / 31622 ---
+Results for N=11594:
+  err_imp(f*)     = 0.40883
+  err_imp(f*_s)   = 0.22828
+  err_imp(f*_imp) = 0.18278
+
+--- Training on Subset Size: 14932 / 31622 ---
+Results for N=14932:
+  err_imp(f*)     = 0.40620
+  err_imp(f*_s)   = 0.21721
+  err_imp(f*_imp) = 0.19136
+
+--- Training on Subset Size: 18270 / 31622 ---
+Results for N=18270:
+  err_imp(f*)     = 0.40457
+  err_imp(f*_s)   = 0.21780
+  err_imp(f*_imp) = 0.18346
+
+--- Training on Subset Size: 21608 / 31622 ---
+Results for N=21608:
+  err_imp(f*)     = 0.39862
+  err_imp(f*_s)   = 0.21963
+  err_imp(f*_imp) = 0.17757
+
+--- Training on Subset Size: 24946 / 31622 ---
+Results for N=24946:
+  err_imp(f*)     = 0.41550
+  err_imp(f*_s)   = 0.21948
+  err_imp(f*_imp) = 0.17762
+
+--- Training on Subset Size: 28284 / 31622 ---
+Results for N=28284:
+  err_imp(f*)     = 0.41651
+  err_imp(f*_s)   = 0.21366
+  err_imp(f*_imp) = 0.18091
+
+--- Training on Subset Size: 31622 / 31622 ---
+Results for N=31622:
+  err_imp(f*)     = 0.40384
+  err_imp(f*_s)   = 0.22164
+  err_imp(f*_imp) = 0.18827
+
+Generating sample complexity plots...
+Plot saved as 'sample_complexity_curves.png'.
