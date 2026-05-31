@@ -39,57 +39,68 @@ def set_seed(seed=42):
 # =============================================================================
 # 1. DATA PREPARATION (LAW SCHOOL DATASET)
 # =============================================================================
-def load_and_process_lawschool(datapath='law_school_clean.csv'):
-    df = pd.read_csv('law_school_clean.csv')
+
+# def load_and_process_lawschool(datapath='law_school_clean.csv'):
+def load_and_process_lawschool(datapath):
+    df = pd.read_csv(datapath)
     target = 'pass_bar'
-    non_manipulable = ['fulltime', 'male', 'racetxt', 'race', 'fam_inc', 'tier']
+
+    non_manipulable = ['fulltime', 'male', 'race']
     feature_cols = [c for c in df.columns if c not in [target] + non_manipulable]
+
     X = df[feature_cols].values.astype(float)
     y = df[target].values.astype(int)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
     return X_train, X_test, y_train, y_test, feature_cols
 
-def generate_synthetic_data():
-    X = np.random.randn(1000, 5)
-    w_true = np.array([1.0, 2.0, -0.5, 0.5, 1.0])
-    p = 1 / (1 + np.exp(-(X @ w_true)))
-    y = np.random.binomial(1, p)
-    feature_cols = ['feat1', 'feat2', 'feat3', 'feat4', 'feat5']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
-    return X_train, X_test, y_train, y_test, feature_cols
+# def build_dataloaders(X_scaled, Y, batch_size=64):
+#     X = X_scaled.astype(np.float32)
+#     if Y.ndim == 1:
+#         Y = Y.reshape(-1, 1)
+#     Y = Y.astype(np.float32)
 
-def build_dataloaders(X_scaled, Y, batch_size=64):
-    X = X_scaled.astype(np.float32)
+#     X_train_np, X_val_np, Y_train_np, Y_val_np = train_test_split(
+#         X, Y, test_size=0.2, random_state=42, stratify=Y
+#     )
+
+#     X_train_t = torch.from_numpy(X_train_np)
+#     Y_train_t = torch.from_numpy(Y_train_np)
+#     X_val_t = torch.from_numpy(X_val_np)
+#     Y_val_t = torch.from_numpy(Y_val_np)
+
+#     # Re-implemented the WeightedRandomSampler logic
+#     n_pos = torch.sum(Y_train_t == 1).item()
+#     n_neg = torch.sum(Y_train_t == 0).item()
+    
+#     if n_pos == 0 or n_neg == 0: 
+#         weights = torch.ones_like(Y_train_t).view(-1)
+#     else:
+#         w_pos = 1.0 / n_pos
+#         w_neg = 1.0 / n_neg
+#         weights = torch.where(Y_train_t.view(-1) == 1, w_pos, w_neg)
+
+#     sampler = WeightedRandomSampler(weights, num_samples=len(Y_train_t), replacement=True)
+
+#     # train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, sampler=sampler)
+#     train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, shuffle=False)
+#     val_dl = DataLoader(TensorDataset(X_val_t, Y_val_t), batch_size=batch_size, shuffle=False)
+    
+#     return train_dl, val_dl
+
+
+def build_dataloaders(X, Y, batch_size=64):
+    
+    X = X.astype(np.float32)
     if Y.ndim == 1:
         Y = Y.reshape(-1, 1)
     Y = Y.astype(np.float32)
-
-    X_train_np, X_val_np, Y_train_np, Y_val_np = train_test_split(
-        X, Y, test_size=0.2, random_state=42, stratify=Y
-    )
-
-    X_train_t = torch.from_numpy(X_train_np)
-    Y_train_t = torch.from_numpy(Y_train_np)
-    X_val_t = torch.from_numpy(X_val_np)
-    Y_val_t = torch.from_numpy(Y_val_np)
-
-    # Re-implemented the WeightedRandomSampler logic
-    n_pos = torch.sum(Y_train_t == 1).item()
-    n_neg = torch.sum(Y_train_t == 0).item()
     
-    if n_pos == 0 or n_neg == 0: 
-        weights = torch.ones_like(Y_train_t).view(-1)
-    else:
-        w_pos = 1.0 / n_pos
-        w_neg = 1.0 / n_neg
-        weights = torch.where(Y_train_t.view(-1) == 1, w_pos, w_neg)
-
-    sampler = WeightedRandomSampler(weights, num_samples=len(Y_train_t), replacement=True)
-
-    train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, sampler=sampler)
-    val_dl = DataLoader(TensorDataset(X_val_t, Y_val_t), batch_size=batch_size, shuffle=False)
+    X_train_t = torch.from_numpy(X)
+    Y_train_t = torch.from_numpy(Y)
     
-    return train_dl, val_dl
+    train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, shuffle=True)
+    
+    return train_dl
 
 # =============================================================================
 # 2. MODELS & UTILS
@@ -111,31 +122,77 @@ def estimate_eta(X_tr, y_tr):
 # =============================================================================
 # 3. STRATEGIC LOGIC (Helpers)
 # =============================================================================
+### Strategic response function for batch of samples
+
 def get_strategic_response_batch(X_batch_np, w_np, b_np, alpha_np, beta):
     batch_size, d = X_batch_np.shape
     X_manip = X_batch_np.copy()
+    
+    # last two features are categorical
+    categorical_indices = [d-2, d-1]
     
     roi = w_np / (alpha_np + 1e-12)
     k_star = np.argmax(roi)
     
     scores = X_batch_np @ w_np + b_np
     neg_indices = np.where(scores < 0)[0]
+
+    manipulated_indices = []
     
     if len(neg_indices) > 0:
-        gap = -scores[neg_indices] 
-        w_k = w_np[k_star]
         
-        if w_k > 1e-8:
-            delta_k = gap / w_k
-            cost = alpha_np[k_star] * delta_k
+        # =========================
+        # CASE 1: Numerical feature
+        # =========================
+        if k_star not in categorical_indices:
             
-            do_manipulate = cost <= beta
+            gap = -scores[neg_indices] 
+            w_k = w_np[k_star]
             
-            idx_to_change = neg_indices[do_manipulate]
-            delta_to_apply = delta_k[do_manipulate]
-            
-            X_manip[idx_to_change, k_star] += (delta_to_apply + 1e-5)
-            
+            if w_k > 1e-8:
+                delta_k = gap / w_k
+                cost = alpha_np[k_star] * delta_k
+                
+                do_manipulate = cost <= beta
+                
+                idx_to_change = neg_indices[do_manipulate]
+                delta_to_apply = delta_k[do_manipulate]
+                
+                X_manip[idx_to_change, k_star] += (delta_to_apply + 1e-5)
+
+                manipulated_indices = idx_to_change.tolist()
+        
+        # =========================
+        # CASE 2: Categorical feature
+        # =========================
+        else:
+            for i in neg_indices:
+                
+                current_val = X_batch_np[i, k_star]
+                best_val = current_val
+                best_gain = 0
+                
+                # corrected ranges
+                if k_star == d-2:   # fam_inc: 1–5
+                    possible_values = [1,2,3,4,5]
+                else:              # tier: 1–6
+                    possible_values = [1,2,3,4,5,6]
+                
+                for v in possible_values:
+                    if v == current_val:
+                        continue
+                    
+                    gain = w_np[k_star] * (v - current_val)
+                    cost = alpha_np[k_star]
+                    
+                    if gain > best_gain and cost <= beta:
+                        best_gain = gain
+                        best_val = v
+                
+                if best_val != current_val:
+                    X_manip[i, k_star] = best_val
+                    manipulated_indices.append(i)
+
     return X_manip
 
 # =============================================================================
@@ -153,7 +210,8 @@ class BayesTrainer:
         margin = y_tilde * pred
         hinge = torch.relu(1 - margin).mean()
         reg = 0.5 * torch.sum(self.model.out.weight ** 2)
-        return self.C * hinge + reg
+        # return self.C * hinge + reg
+        return hinge
 
     def train(self, n_epochs):
         self.model.train()
@@ -186,7 +244,8 @@ class StrategicTrainer:
         margin = y_tilde * (pred + s_gain)
         hinge = torch.relu(1 - margin).mean()
         reg = 0.5 * torch.sum(w ** 2)
-        return self.C * hinge + reg
+        # return self.C * hinge + reg
+        return hinge
 
     def train(self, n_epochs):
         self.model.train()
@@ -274,10 +333,10 @@ if __name__ == "__main__":
     set_seed(42)
     
     try:
-        X_train, X_test, y_train, y_test, feature_cols = load_and_process_lawschool('law_dataset.arff')
+        # X_train, X_test, y_train, y_test, feature_cols = load_and_process_lawschool('law_dataset.arff')
+        X_train, X_test, y_train, y_test, feature_cols = load_and_process_lawschool('NeurIPS_submission/Error_plots/law_school/law_school_clean.csv')
     except Exception as e:
-        print(f"Data loading error: {e}. Falling back to synthetic data.")
-        X_train, X_test, y_train, y_test, feature_cols = generate_synthetic_data()
+        print(f"Data loading error: {e}.")
 
     scaler = StandardScaler()
     X_train_sc = scaler.fit_transform(X_train)
@@ -291,40 +350,109 @@ if __name__ == "__main__":
     eta_model_oracle = estimate_eta(X_train_sc, y_train)
     
     # Experiment Constants
-    fixed_beta = 0.01
+    # fixed_beta = 5.0
+    fixed_beta = 1.0
+    
     
     # DYNAMIC ALPHA SIZING for Law School
     # cost_map = {
-    #     'lsat': 250,     
-    #     'ugpa': 250,    
-    #     'zfygpa': 25,  
-    #     'zgpa': 25,    
-    #     'decile1b': 100, 
-    #     'decile3': 100,  
-    #     'fam_inc': 25.0,  
-    #     'tier': 100.0     
-    # }
+    # 'decile1b': 1.0,  
+    # 'decile3': 1.0,
+    # 'lsat': 1.0,
+    # 'ugpa': 1.0,
+    # 'zfygpa': 1.0,
+    # 'zgpa': 1.0,
+    # 'fam_inc': 1.0,
+    # 'tier': 1.0
+    # }   
+    
+    # up 6
     cost_map = {
-    'lsat': 1.0,      # Prep courses can help, but hard
-    'ugpa': 0.5,     # Immutable once graduated
-    'zfygpa': 1.0,   # Immutable past 1st year
-    'zgpa': 1.0,       # Can be somewhat improved before graduation
-    'decile1b': 10.0,  # Zero-sum class rank, very hard
-    'decile3': 10.0,   # Zero-sum class rank, very hard
-    }
+    'decile1b': 0.2,  
+    'decile3': 0.2,
+    'lsat': 0.2,
+    'ugpa': 0.2,
+    'zfygpa': 0.2,
+    'zgpa': 0.1,
+    'fam_inc': 0.1,
+    'tier': 0.1
+    } 
+    
+    # up 8 
+    # cost_map = {
+    # 'decile1b': 0.2,  
+    # 'decile3': 0.2,
+    # 'lsat': 0.2,
+    # 'ugpa': 0.2,
+    # 'zfygpa': 0.2,
+    # 'zgpa': 0.1,
+    # 'fam_inc': 0.2,
+    # 'tier': 0.1
+    # }  
+     
+    # cost_map = {
+    # 'decile1b': 0.2,  
+    # 'decile3': 0.2,
+    # 'lsat': 0.2,
+    # 'ugpa': 0.2,
+    # 'zfygpa': 0.2,
+    # 'zgpa': 0.1,
+    # 'fam_inc': 0.2,
+    # 'tier': 0.2
+    # }  
+    
+    
+    # cost_map = {
+    # 'decile1b': 1.0,  
+    # 'decile3': 1.0,
+    # 'lsat': 1.5,
+    # 'ugpa': 2.0,
+    # 'zfygpa': 10.0,
+    # 'zgpa': 10,
+    # 'fam_inc': 0.8,
+    # 'tier': 0.8
+    # } 
+    
+    # cost_map = {
+    # 'decile1b': 1.0,  
+    # 'decile3': 1.0,
+    # 'lsat': 1.5,
+    # 'ugpa': 2.0,
+    # 'zfygpa': 10.0,
+    # 'zgpa': 10,
+    # 'fam_inc': 0.8,
+    # 'tier': 0.8
+    # } 
+    
+    # cost_map = {
+    # 'decile1b': 0.125,  
+    # 'decile3': 0.125,
+    # 'lsat': 0.125,
+    # 'ugpa': 0.125,
+    # 'zfygpa': 0.125,
+    # 'zgpa': 0.125,
+    # 'fam_inc': 0.125,
+    # 'tier': 0.125
+    # } 
+    
     alpha_vals = [cost_map[f] for f in cost_map]
     print(f"Assigned Alpha Costs: {dict(zip(feature_cols, alpha_vals))}")
     
     fixed_alpha = torch.tensor(alpha_vals, dtype=torch.float32, device=device)
     fixed_alpha_np = fixed_alpha.cpu().numpy()
     
-    # Define 10 varying sizes for the training subset
-    max_train_size = len(X_train_sc)
-    min_train_size = max(500, max_train_size // 20)
-    train_sizes = np.linspace(min_train_size, max_train_size, 10).astype(int)
+    
+    # train_sizes = [60, 200, 500, 1000, 2000, 4000, 6000] 
+    # train_sizes = [100, 200, 400, 600, 1000, 2000, 4000, 6000, 10000, 12000, 14000] 
+    train_sizes = [60, 140, 300, 500, 1000, 4000, 6000, 8000, 10000, 12000, 14000]
+    # train_sizes = [60, 140, 300, 500, 1000, 4000, 6000] 
+     
+    
+    
+    print("Training sizes on which it is being trained: ", train_sizes) ## updated training size
     
     # Define number of random splits per sample size
-    num_runs = 5
+    num_runs = 10 # for now, to get it fast 
     
     # Tracking metrics
     mean_b, std_b = [], []
@@ -336,7 +464,6 @@ if __name__ == "__main__":
     print("="*85)
     
     for n in train_sizes:
-        print(f"\n--- Training on Subset Size: {n} / {max_train_size} ---")
         
         runs_err_b, runs_err_s, runs_err_i = [], [], []
         
@@ -350,25 +477,28 @@ if __name__ == "__main__":
                 random_state=42 + run
             )
             
-            train_dl_sub, _ = build_dataloaders(X_tr_sub, y_tr_sub)
+            train_dl_sub = build_dataloaders(X_tr_sub, y_tr_sub)
             eta_model_sub = estimate_eta(X_tr_sub, y_tr_sub)
             
             model_bayes = LinearClassifier(d, 1).to(device)
-            opt_b = torch.optim.Adam(model_bayes.parameters(), lr=0.01)
+            # opt_b = torch.optim.Adam(model_bayes.parameters(), lr=0.1)
+            opt_b = torch.optim.SGD(model_bayes.parameters(), lr=0.1, momentum=0.9)
             trainer_b = BayesTrainer(model_bayes, train_dl_sub, opt_b, C=1.0)
             trainer_b.train(n_epochs=50) 
             
             model_strat = LinearClassifier(d, 1).to(device)
-            # model_strat.load_state_dict(model_bayes.state_dict())
-            opt_s = torch.optim.Adam(model_strat.parameters(), lr=0.01)
+            model_strat.load_state_dict(model_bayes.state_dict())
+            # opt_s = torch.optim.Adam(model_strat.parameters(), lr=0.1)
+            opt_s = torch.optim.SGD(model_strat.parameters(), lr=0.1, momentum=0.9)
             trainer_s = StrategicTrainer(model_strat, train_dl_sub, opt_s, fixed_alpha, fixed_beta, C=1.0)
-            trainer_s.train(n_epochs=50)
+            trainer_s.train(n_epochs=65)
             
             model_imp = LinearClassifier(d, 1).to(device)
-            # model_imp.load_state_dict(model_bayes.state_dict())
-            opt_imp = torch.optim.Adam(model_imp.parameters(), lr=0.01)
+            model_imp.load_state_dict(model_bayes.state_dict())
+            # opt_imp = torch.optim.Adam(model_imp.parameters(), lr=0.1)
+            opt_imp = torch.optim.SGD(model_imp.parameters(), lr=0.1, momentum=0.9)
             trainer_imp = ImprovementAwareTrainer(model_imp, train_dl_sub, opt_imp, eta_model_sub, fixed_alpha, fixed_beta, C=1.0)
-            trainer_imp.train(n_epochs=80) 
+            trainer_imp.train(n_epochs=70) 
             
             err_b = compute_err_imp(model_bayes, X_test_sc, eta_model_oracle, fixed_alpha_np, fixed_beta)
             err_s = compute_err_imp(model_strat, X_test_sc, eta_model_oracle, fixed_alpha_np, fixed_beta)
@@ -403,22 +533,25 @@ if __name__ == "__main__":
     
     plt.figure(figsize=(10, 6))
      
-    plt.plot(train_sizes, mean_b, marker='o', linestyle='-', linewidth=2, color='tab:blue', label=r'Bayes Optimal ($f^*$)')
+    plt.plot(train_sizes, mean_b, marker='o', linestyle='-', linewidth=2, color='tab:blue', label=r'Optimal Linear ($f^*$)')
     plt.fill_between(train_sizes, mean_b - std_b, mean_b + std_b, color='tab:blue', alpha=0.2)
     
-    plt.plot(train_sizes, mean_s, marker='s', linestyle='-', linewidth=2, color='tab:orange', label=r'Strategic ($f_s^*$)')
+    plt.plot(train_sizes, mean_s, marker='s', linestyle='-', linewidth=2, color='tab:orange', label=r'Strategic Linear ($f_s^*$)')
     plt.fill_between(train_sizes, mean_s - std_s, mean_s + std_s, color='tab:orange', alpha=0.2)
     
-    plt.plot(train_sizes, mean_i, marker='^', linestyle='-', linewidth=2, color='tab:green', label=r'Improvement-Aware ($f_{imp}^*$)')
+    plt.plot(train_sizes, mean_i, marker='^', linestyle='-', linewidth=2, color='tab:green', label=r'Improvement-Aware Linear ($f_{imp}^*$)')
     plt.fill_between(train_sizes, mean_i - std_i, mean_i + std_i, color='tab:green', alpha=0.2)
     
-    plt.xlabel('Number of Training Samples N', fontsize=12)
-    plt.ylabel('Improvement Error (err_imp)', fontsize=12)
-    plt.title(f'Sample Complexity vs Improvement Error (Law School Dataset, beta=1.0)', fontsize=14)
+    plt.xlabel('Training Samples', fontsize=12)
+    plt.ylabel('Improvement-Aware Strategic Error', fontsize=12)
+    # plt.title(f'Sample Complexity vs Improvement Error', fontsize=14)
     plt.legend(fontsize=11)
     plt.grid(True, linestyle='--', alpha=0.7)
     
     plt.tight_layout()
-    plt.savefig('sample_complexity_curves_lawschool.png', dpi=300)
+    # plt.savefig('sample_complexity_curves_with_variance.png', dpi=300)
+    plt.savefig('law_school_imp.png', dpi=300)
+    
     plt.show()
-    print("Plot saved as 'sample_complexity_curves_lawschool.png'.")
+    # print("Plot saved as 'sample_complexity_curves_with_variance.png'.")
+    print("Plot saved as 'law_school_sample_complexity_curves_with_variance.png'.")

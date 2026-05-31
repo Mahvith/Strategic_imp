@@ -58,14 +58,6 @@ def load_and_process_heloc(datapath='heloc.csv'):
         "MaxDelq2PublicRecLast12M",
         "MSinceMostRecentInqexcl7days",
     ]
-
-    # features = [
-    # "NumSatisfactoryTrades",
-    # "PercentTradesNeverDelq",
-    # "MSinceMostRecentDelq",
-    # # "NumInqLast6Mexcl7days",
-    # "MSinceMostRecentInqexcl7days",
-    # ]
     
     # Handle HELOC special values (-7, -8, -9) 
     X_raw = df[features].replace([-7, -8, -9], np.nan)
@@ -104,7 +96,8 @@ def build_dataloaders(X_scaled, Y, batch_size=64):
 
     sampler = WeightedRandomSampler(weights, num_samples=len(Y_train_t), replacement=True)
 
-    train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, sampler=sampler)
+    # train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, sampler=sampler)
+    train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, shuffle=True)
     val_dl = DataLoader(TensorDataset(X_val_t, Y_val_t), batch_size=batch_size, shuffle=False)
     
     return train_dl, val_dl
@@ -295,8 +288,8 @@ if __name__ == "__main__":
     try:
         X_train, X_test, y_train, y_test = load_and_process_heloc(datapath='heloc.csv')
     except Exception as e:
-        print(f"Data loading error: {e}. Falling back to synthetic data.")
-        X_train, X_test, y_train, y_test = generate_synthetic_data()
+        print(f"Data loading error: {e}.")
+        # X_train, X_test, y_train, y_test = generate_synthetic_data()
 
     scaler = StandardScaler()
     X_train_sc = scaler.fit_transform(X_train)
@@ -331,25 +324,36 @@ if __name__ == "__main__":
     
     # Since all selected features are standardized, alpha is interpreted in
     # standardized feature units. Start with a uniform cost and then tune.
-    ALPHA_BY_FEATURE = {
-        "ExternalRiskEstimate": 0.8,
-        "MSinceOldestTradeOpen": 2.5,
-        "AverageMInFile": 2.0,
-        "NumSatisfactoryTrades": 1.8,
-        "PercentTradesNeverDelq": 1.0,
-        "MSinceMostRecentDelq": 2.2,
-        "MaxDelq2PublicRecLast12M": 2.8,
-        "MSinceMostRecentInqexcl7days": 0.7,
-    }
-    
     # ALPHA_BY_FEATURE = {
-    # "NumSatisfactoryTrades": 10.0,
-    # "PercentTradesNeverDelq": 10.0,
-    # "MSinceMostRecentDelq": 1.0, ## can replace this
-    # # "NumInqLast6Mexcl7days": 5.0,
-    # "MSinceMostRecentInqexcl7days": 1.0,
+    #     "ExternalRiskEstimate": 3.0,        
+    #     "MSinceOldestTradeOpen": 10.0,      # Passive wait
+    #     "AverageMInFile": 10.0,             # Passive wait
+    #     "NumSatisfactoryTrades": 1.0,       # Active: Open a secured credit card
+    #     "PercentTradesNeverDelq": 2.5,      # Active: Start paying on time immediately
+    #     "MSinceMostRecentDelq": 10.0,       # Passive wait
+    #     "MaxDelq2PublicRecLast12M": 10.0,   # Passive wait 
+    #     "MSinceMostRecentInqexcl7days": 0.5 # Active/Passive: Stop applying for loans right now
     # }
-    # NumInqLast6Mexcl7days do use or not ?? have to decide it 
+    ALPHA_BY_FEATURE = {
+        "ExternalRiskEstimate": 1.0,        
+        "MSinceOldestTradeOpen": 1.0,      # Passive wait
+        "AverageMInFile": 1.0,             # Passive wait
+        "NumSatisfactoryTrades": 1.0,       # Active: Open a secured credit card
+        "PercentTradesNeverDelq": 1.0,      # Active: Start paying on time immediately
+        "MSinceMostRecentDelq": 1.0,       # Passive wait
+        "MaxDelq2PublicRecLast12M": 1.0,   # Passive wait 
+        "MSinceMostRecentInqexcl7days": 1.0 # Active/Passive: Stop applying for loans right now
+    }
+    # {
+    #     "ExternalRiskEstimate": 0.8,
+    #     "MSinceOldestTradeOpen": 2.5,
+    #     "AverageMInFile": 2.0,
+    #     "NumSatisfactoryTrades": 1.8,
+    #     "PercentTradesNeverDelq": 1.0,
+    #     "MSinceMostRecentDelq": 2.2,
+    #     "MaxDelq2PublicRecLast12M": 2.8,
+    #     "MSinceMostRecentInqexcl7days": 0.7,
+    # }
     
     # Experiment Constants
     fixed_beta = 1.0
@@ -371,11 +375,13 @@ if __name__ == "__main__":
     min_eff = int(max_eff / 10)
     
     # Generate 10 evenly spaced steps
-    train_sizes = np.linspace(min_eff, max_eff, 10).astype(int)
+    # train_sizes = np.linspace(min_eff, max_eff, 10).astype(int)
+    # train_sizes = [100, 500, 700, 2000, 4000, 6000, 7000] ## updated training size
+    train_sizes = [20, 200, 500, 1500, 3000] ## updated training size
     print("Training sizes on which it is being trained: ", train_sizes)
     
     # Define number of random splits per sample size
-    num_runs = 5
+    num_runs = 10 ## for now (instead of 50)
     
     # Tracking metrics (Means and Standard Deviations)
     mean_b, std_b = [], []
@@ -466,15 +472,15 @@ if __name__ == "__main__":
     plt.figure(figsize=(10, 6))
      
     # Plot Bayes Optimal
-    plt.plot(train_sizes, mean_b, marker='o', linestyle='-', linewidth=2, color='tab:blue', label=r'Bayes Optimal ($f^*$)')
+    plt.plot(train_sizes, mean_b, marker='o', linestyle='-', linewidth=2, color='tab:blue', label=r'Optimal Linear ($f^*$)')
     plt.fill_between(train_sizes, mean_b - std_b, mean_b + std_b, color='tab:blue', alpha=0.2)
     
     # Plot Strategic
-    plt.plot(train_sizes, mean_s, marker='s', linestyle='-', linewidth=2, color='tab:orange', label=r'Strategic ($f_s^*$)')
+    plt.plot(train_sizes, mean_s, marker='s', linestyle='-', linewidth=2, color='tab:orange', label=r'Strategic Linear ($f_s^*$)')
     plt.fill_between(train_sizes, mean_s - std_s, mean_s + std_s, color='tab:orange', alpha=0.2)
     
     # Plot Improvement-Aware
-    plt.plot(train_sizes, mean_i, marker='^', linestyle='-', linewidth=2, color='tab:green', label=r'Improvement-Aware ($f_{imp}^*$)')
+    plt.plot(train_sizes, mean_i, marker='^', linestyle='-', linewidth=2, color='tab:green', label=r'Improvement-Aware Linear ($f_{imp}^*$)')
     plt.fill_between(train_sizes, mean_i - std_i, mean_i + std_i, color='tab:green', alpha=0.2)
     
     plt.xlabel('Training Samples', fontsize=12)

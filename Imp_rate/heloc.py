@@ -12,7 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
 set_seed(42)
 
-X, y = load_and_process_heloc('Imp_rate/heloc.csv')
+X, y = load_and_process_heloc('heloc.csv')
 
 X_train, X_test, y_train, y_test = data_split(X, y, 0.3)
 train_dl = build_dataloaders(X_train, y_train)
@@ -21,7 +21,10 @@ eta_model = estimate_eta(X_train, y_train)
 
 
 beta = 1.0
-alpha = torch.tensor([0.8, 2.5, 2.0, 1.8, 1.0, 2.2, 2.8, 0.7], dtype=torch.float32, device=device)
+# alpha = torch.tensor([0.8, 2.5, 2.0, 1.8, 1.0, 2.2, 2.8, 0.7], dtype=torch.float32, device=device)
+# alpha = torch.tensor([0.8, 2.0, 10.0, 10, 10, 2.2, 2.8, 0.7], dtype=torch.float32, device=device)
+# alpha = torch.tensor([2.0, 2.0, 2.0, 2.0, 3.0, 1.7, 1.7, 1.7], dtype=torch.float32, device=device)
+alpha = torch.tensor([1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8], dtype=torch.float32, device=device)
 
 
 # Train Optimal linear classifier (Independent of alpha and beta)
@@ -96,5 +99,7 @@ for name, model in models.items():
         alpha_np,
         beta
     )   
+    
+    print(f"{name   }: Manipulated={n_manip}, Improved={n_imp}, Improvement Rate={rate:.4f}" )
 
-    log_experiment(name ,w,b,alpha_np,beta,n_manip,n_imp,rate, "Imp_rate/heloc_Imp_rate.csv")
+    log_experiment(name ,w,b,alpha_np,beta,n_manip,n_imp,rate, "heloc_Imp_rate.csv")

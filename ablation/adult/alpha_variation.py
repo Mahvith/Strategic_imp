@@ -16,7 +16,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from tqdm import tqdm
 
-device = torch.device("cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def set_seed(seed=42):
     random.seed(seed)
@@ -64,7 +64,8 @@ def build_dataloaders(X_scaled, Y, batch_size=512):
         weights = torch.where(Y_train_t.view(-1) == 1, w_pos, w_neg)
 
     sampler = WeightedRandomSampler(weights, num_samples=len(Y_train_t), replacement=True)
-    train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, sampler=sampler)
+    # train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, sampler=sampler)
+    train_dl = DataLoader(TensorDataset(X_train_t, Y_train_t), batch_size=batch_size, shuffle=True)
     return train_dl
 
 class LinearClassifier(nn.Module):
@@ -107,8 +108,10 @@ class BayesTrainer:
         pred = self.model(xb).squeeze(-1)
         margin = y_tilde * pred
         hinge = torch.relu(1 - margin).mean()
-        reg = 0.5 * torch.sum(self.model.out.weight ** 2)
-        return self.C * hinge + reg
+        # reg = 0.5 * torch.sum(self.model.out.weight ** 2)
+        # return self.C * hinge + reg
+        return hinge
+    
     def train(self, n_epochs):
         self.model.train()
         for _ in tqdm(range(n_epochs)):
@@ -130,8 +133,10 @@ class StrategicTrainer:
         s_gain = self.beta * torch.max(roi)
         margin = y_tilde * (pred + s_gain)
         hinge = torch.relu(1 - margin).mean()
-        reg = 0.5 * torch.sum(w ** 2)
-        return self.C * hinge + reg
+        # reg = 0.5 * torch.sum(w ** 2)
+        # return self.C * hinge + reg
+        return hinge
+    
     def train(self, n_epochs):
         self.model.train()
         for _ in tqdm(range(n_epochs)):
@@ -162,7 +167,9 @@ class ImprovementAwareTrainer:
         s_gain = self.beta * torch.max(roi)
         margin = y_tilde_imp * (pred + s_gain)
         hinge = torch.relu(1 - margin).mean()
-        return self.C * hinge
+        # return self.C * hinge
+        return hinge
+    
     def train(self, n_epochs):
         self.model.train()
         for _ in tqdm(range(n_epochs)):
@@ -204,7 +211,7 @@ cost_map = {
 }
 base_alpha = np.array([cost_map.get(f, 100.0) for f in features])
 
-alpha_multipliers = [0.1, 0.5, 1.0, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0]
+alpha_multipliers = [0.5, 1.0, 2.0, 5.0, 10.0, 100.0]
 train_dl = build_dataloaders(X_train_sc, y_train, batch_size=512)
 
 results_b, results_s, results_i = [], [], []
@@ -242,9 +249,9 @@ for scale in tqdm(alpha_multipliers):
     print(f"Scale: {scale:5.2f} | f*: {err_b:.4f} | f*_s: {err_s:.4f} | f*_imp: {err_i:.4f} | Trend: {trend_holds}")
 
 plt.figure(figsize=(10, 6))
-plt.plot(alpha_multipliers, results_b, marker='o', label=r'Bayes Optimal ($f^*$)')
-plt.plot(alpha_multipliers, results_s, marker='s', label=r'Strategic ($f_s^*$)')
-plt.plot(alpha_multipliers, results_i, marker='^', label=r'Improvement-Aware ($f_{imp}^*$)')
+plt.plot(alpha_multipliers, results_b, marker='o', label=r'Optimal Linear ($f^*$)')
+plt.plot(alpha_multipliers, results_s, marker='s', label=r'Strategic Linear ($f_s^*$)')
+plt.plot(alpha_multipliers, results_i, marker='^', label=r'Improvement-Aware Linear ($f_{imp}^*$)')
 plt.xscale('log')
 plt.xlabel('Alpha Multiplier (Log Scale)')
 plt.ylabel('Improvement Error (err_imp)')
