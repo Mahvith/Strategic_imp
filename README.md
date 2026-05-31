@@ -1,1 +1,1 @@
-# Strategic Classification with Endogenous Improvements
+# Linear Strategic Classification with Endogenous Improvements
